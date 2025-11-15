@@ -1,0 +1,39 @@
+{
+  "info": {
+    "name": "SMS DevOps",
+    "_postman_id": "5c8b3b54-aaaa-4f1d-a8d7-1cb46f70a100",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Register",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "{{baseUrl}}/api/auth/register", "host": ["{{baseUrl}}"], "path": ["api", "auth", "register"] },
+        "body": { "mode": "raw", "raw": "{\n  \"fullName\": \"Admin Root\",\n  \"email\": \"admin@sms.dev\",\n  \"password\": \"ChangeMe123!\",\n  \"role\": \"ADMIN\"\n}" }
+      }
+    },
+    {
+      "name": "Login",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] },
+        "body": { "mode": "raw", "raw": "{\n  \"email\": \"admin@sms.dev\",\n  \"password\": \"ChangeMe123!\"\n}" }
+      }
+    },
+    {
+      "name": "Create Student",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "url": { "raw": "{{baseUrl}}/api/students", "host": ["{{baseUrl}}"], "path": ["api", "students"] },
+        "body": { "mode": "raw", "raw": "{\n \"rollNo\":\"2024-001\",\n \"firstName\":\"Jamie\",\n \"lastName\":\"Doe\",\n \"email\":\"jamie@example.com\",\n \"phone\":\"9991112222\",\n \"dob\":\"2004-01-12\",\n \"gender\":\"F\",\n \"address\":\"123 Main\",\n \"departmentId\":1,\n \"enrollDate\":\"2022-09-01\",\n \"profilePhotoUrl\":\"https://picsum.photos/200\",\n \"status\":\"ACTIVE\"\n}" }
+      }
+    }
+  ]
+}

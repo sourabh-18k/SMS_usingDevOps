@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: sms
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+
+server:
+  port: ${SERVER_PORT:8080}
+
+jwt:
+  secret: ${JWT_SECRET:local-secret-local-secret-123456789012}
+  expirationMs: ${JWT_EXPIRATION_MS:86400000}
+
+logging:
+  level:
+    root: INFO

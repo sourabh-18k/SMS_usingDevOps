@@ -1,0 +1,20 @@
+Start the backend and leave that terminal running:
+
+cd D:\SMS_devOps\backend
+mvn org.springframework.boot:spring-boot-maven-plugin:3.2.5:run "-Dspring-boot.run.profiles=dev"
+
+
+In a separate terminal, start the frontend (after npm install once):
+
+
+$env:Path="C:\Program Files\nodejs;"+$env:Path
+cd D:\SMS_devOps\frontend
+npm run dev -- --host 0.0.0.0
+
+
+
+curl.exe http://localhost:8080/
+curl.exe -X POST http://localhost:8080/api/auth/login -H "Content-Type: application/json" -d "{\"email\":\"admin@sms.dev\",\"password\":\"ChangeMe123!\"}"
+
+http://localhost:5173/login 
+

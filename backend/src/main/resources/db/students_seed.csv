@@ -1,0 +1,3 @@
+rollNo,firstName,lastName,email,phone,dob,gender,address,departmentCode,enrollDate,profilePhotoUrl,status
+2024CSE100,Noah,Ramos,noah@uni.dev,5557771111,2004-02-02,M,Campus Block C,CSE,2022-08-01,https://picsum.photos/210,ACTIVE
+2024CSE101,Elena,Cho,elena@uni.dev,5557772222,2003-11-11,F,Campus Block D,CSE,2021-08-01,https://picsum.photos/211,ACTIVE

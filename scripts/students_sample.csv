@@ -1,0 +1,4 @@
+rollNo,firstName,lastName,email,phone,dob,gender,address,departmentCode,enrollDate,profilePhotoUrl,status
+2024CSE001,Jamie,Lee,jamie@uni.dev,5550001111,2004-01-12,F,Dorm 7,CSE,2022-08-01,https://picsum.photos/200,ACTIVE
+2024ECE002,Ravi,Patel,ravi@uni.dev,5550002222,2003-05-20,M,Off Campus,ECE,2021-09-01,https://picsum.photos/201,ACTIVE
+2024CSE003,Amelia,Stone,amelia@uni.dev,5550003333,2004-03-18,F,Campus Apt,CSE,2022-08-01,https://picsum.photos/202,INACTIVE
