@@ -73,13 +73,6 @@
         docker-compose up -d
       become_user: "{{ ansible_user }}"
 
-    - name: Wait for backend to be ready
-      wait_for:
-        host: localhost
-        port: 8080
-        delay: 10
-        timeout: 120
-
     - name: Check container status
       shell: docker-compose ps
       args:
@@ -89,6 +82,36 @@
     - name: Display container status
       debug:
         var: container_status.stdout_lines
+
+    - name: Check backend logs if container exists
+      shell: docker-compose logs backend | tail -50
+      args:
+        chdir: "{{ app_dir }}"
+      register: backend_logs
+      ignore_errors: yes
+
+    - name: Display backend logs
+      debug:
+        var: backend_logs.stdout_lines
+      when: backend_logs is defined
+
+    - name: Wait for backend to be ready
+      wait_for:
+        host: localhost
+        port: 8080
+        delay: 15
+        timeout: 180
+      ignore_errors: yes
+
+    - name: Final container status check
+      shell: docker-compose ps
+      args:
+        chdir: "{{ app_dir }}"
+      register: final_status
+
+    - name: Display final container status
+      debug:
+        var: final_status.stdout_lines
 
     - name: Display deployment info
       debug:
