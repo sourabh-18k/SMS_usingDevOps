@@ -191,7 +191,6 @@ jobs:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     environment:
       name: production
-      url: http://${{ secrets.AZURE_APP_VM_IP }}:8080
     
     steps:
     - name: Checkout code
