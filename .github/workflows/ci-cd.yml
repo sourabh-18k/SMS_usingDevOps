@@ -238,6 +238,7 @@ jobs:
                   ansible_host: ${{ secrets.AZURE_APP_VM_IP }}
                   ansible_user: azureuser
                   ansible_ssh_private_key_file: ~/.ssh/azure_sms_rsa
+                  ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
             
             monitoring_servers:
               hosts:
@@ -245,9 +246,11 @@ jobs:
                   ansible_host: ${{ secrets.AZURE_MONITOR_VM_IP }}
                   ansible_user: azureuser
                   ansible_ssh_private_key_file: ~/.ssh/azure_sms_rsa
+                  ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
           
           vars:
             ansible_python_interpreter: /usr/bin/python3
+            ansible_host_key_checking: false
             db_host: ${{ secrets.AZURE_DB_HOST }}
             db_name: sms
             db_user: ${{ secrets.AZURE_DB_USER }}
@@ -255,8 +258,9 @@ jobs:
             jwt_secret: ${{ secrets.JWT_SECRET }}
         EOF
         
+        cat ansible/inventory/hosts.yml
         cd ansible
-        ansible-playbook -i inventory/hosts.yml playbooks/deploy-app.yml
+        ansible-playbook -i inventory/hosts.yml playbooks/deploy-app.yml -vv
 
     - name: Verify deployment
       run: |
