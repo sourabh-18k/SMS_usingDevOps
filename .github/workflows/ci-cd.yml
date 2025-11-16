@@ -229,14 +229,31 @@ jobs:
 
     - name: Update Ansible inventory
       run: |
-        export APP_VM_IP="${{ secrets.AZURE_APP_VM_IP }}"
-        export MONITOR_VM_IP="${{ secrets.AZURE_MONITOR_VM_IP }}"
-        export DB_HOST="${{ secrets.AZURE_DB_HOST }}"
-        export DB_USER="${{ secrets.AZURE_DB_USER }}"
-        export DB_PASSWORD="${{ secrets.AZURE_DB_PASSWORD }}"
-        export JWT_SECRET="${{ secrets.JWT_SECRET }}"
-        export GIT_REPO="${{ github.server_url }}/${{ github.repository }}"
-        export GIT_BRANCH="${{ github.ref_name }}"
+        cat > ansible/inventory/hosts.yml << EOF
+        all:
+          children:
+            app_servers:
+              hosts:
+                app_vm:
+                  ansible_host: ${{ secrets.AZURE_APP_VM_IP }}
+                  ansible_user: azureuser
+                  ansible_ssh_private_key_file: ~/.ssh/azure_sms_rsa
+            
+            monitoring_servers:
+              hosts:
+                monitor_vm:
+                  ansible_host: ${{ secrets.AZURE_MONITOR_VM_IP }}
+                  ansible_user: azureuser
+                  ansible_ssh_private_key_file: ~/.ssh/azure_sms_rsa
+          
+          vars:
+            ansible_python_interpreter: /usr/bin/python3
+            db_host: ${{ secrets.AZURE_DB_HOST }}
+            db_name: sms
+            db_user: ${{ secrets.AZURE_DB_USER }}
+            db_password: ${{ secrets.AZURE_DB_PASSWORD }}
+            jwt_secret: ${{ secrets.JWT_SECRET }}
+        EOF
         
         cd ansible
         ansible-playbook -i inventory/hosts.yml playbooks/deploy-app.yml
