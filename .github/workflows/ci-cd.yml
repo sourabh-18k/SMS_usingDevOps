@@ -296,7 +296,7 @@ jobs:
 
     - name: Test Backend Health
       run: |
-        APP_IP="${{ secrets.AZURE_APP_VM_IP }}"
+        APP_IP=$(echo "${{ secrets.AZURE_APP_VM_IP }}" | tr -d '[:space:]')
         URL="http://${APP_IP}:8080/"
         echo "Testing URL: [$URL]"
         response=$(curl -s -o /dev/null -w "%{http_code}" "$URL")
@@ -310,7 +310,7 @@ jobs:
 
     - name: Test Frontend Health
       run: |
-        APP_IP="${{ secrets.AZURE_APP_VM_IP }}"
+        APP_IP=$(echo "${{ secrets.AZURE_APP_VM_IP }}" | tr -d '[:space:]')
         URL="http://${APP_IP}:5173/"
         echo "Testing URL: [$URL]"
         response=$(curl -s -o /dev/null -w "%{http_code}" "$URL")
@@ -324,7 +324,7 @@ jobs:
 
     - name: Test Swagger UI
       run: |
-        APP_IP="${{ secrets.AZURE_APP_VM_IP }}"
+        APP_IP=$(echo "${{ secrets.AZURE_APP_VM_IP }}" | tr -d '[:space:]')
         URL="http://${APP_IP}:8080/swagger-ui/index.html"
         echo "Testing URL: [$URL]"
         response=$(curl -s -o /dev/null -w "%{http_code}" "$URL")
