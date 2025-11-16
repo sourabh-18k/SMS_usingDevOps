@@ -11,5 +11,5 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Attendan
     @Query("SELECT AVG(CASE WHEN a.status = 'PRESENT' THEN 1.0 ELSE 0.0 END) FROM Attendance a")
     Double findAverageAttendance();
 
-    List<Attendance> findByCourseId(Long courseId);
+    List<Attendance> findByIdCourseId(Long courseId);
 }

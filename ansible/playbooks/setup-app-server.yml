@@ -1,0 +1,140 @@
+---
+# Playbook: Setup Application Server
+# This playbook installs Docker, PostgreSQL client, and deploys the SMS application
+
+- name: Setup SMS Application Server
+  hosts: app_servers
+  become: yes
+  gather_facts: yes
+
+  vars:
+    docker_compose_version: "2.23.0"
+    app_port: 8080
+    frontend_port: 5173
+
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Install required system packages
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+          - git
+          - postgresql-client
+          - python3-pip
+        state: present
+
+    - name: Add Docker GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker repository
+      apt_repository:
+        repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+        state: present
+
+    - name: Install Docker
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+        state: present
+        update_cache: yes
+
+    - name: Install Docker Compose
+      get_url:
+        url: "https://github.com/docker/compose/releases/download/v{{ docker_compose_version }}/docker-compose-linux-x86_64"
+        dest: /usr/local/bin/docker-compose
+        mode: '0755'
+
+    - name: Add user to docker group
+      user:
+        name: "{{ ansible_user }}"
+        groups: docker
+        append: yes
+
+    - name: Start and enable Docker service
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Install OpenJDK 17 (for local Maven builds)
+      apt:
+        name: openjdk-17-jdk
+        state: present
+
+    - name: Install Maven
+      apt:
+        name: maven
+        state: present
+
+    - name: Install Node.js 20
+      shell: |
+        curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+        apt-get install -y nodejs
+      args:
+        creates: /usr/bin/node
+
+    - name: Create application directory
+      file:
+        path: /opt/sms
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0755'
+
+    - name: Create environment file
+      template:
+        src: templates/app.env.j2
+        dest: /opt/sms/.env
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0600'
+
+    - name: Configure firewall - Allow SSH
+      ufw:
+        rule: allow
+        port: '22'
+        proto: tcp
+
+    - name: Configure firewall - Allow HTTP
+      ufw:
+        rule: allow
+        port: '80'
+        proto: tcp
+
+    - name: Configure firewall - Allow Backend
+      ufw:
+        rule: allow
+        port: "{{ app_port }}"
+        proto: tcp
+
+    - name: Configure firewall - Allow Frontend
+      ufw:
+        rule: allow
+        port: "{{ frontend_port }}"
+        proto: tcp
+
+    - name: Enable firewall
+      ufw:
+        state: enabled
+        policy: deny
+        direction: incoming
+
+    - name: Display connection info
+      debug:
+        msg:
+          - "Application server setup completed!"
+          - "Backend URL: http://{{ ansible_host }}:{{ app_port }}"
+          - "Frontend URL: http://{{ ansible_host }}:{{ frontend_port }}"
+          - "Deploy your application to /opt/sms/"

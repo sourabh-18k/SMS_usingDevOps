@@ -1,0 +1,207 @@
+###############################################################################
+# NAGIOS.CFG - Nagios Core Configuration File
+###############################################################################
+
+# LOG FILE
+log_file=/usr/local/nagios/var/nagios.log
+
+# OBJECT CONFIGURATION FILE(S)
+cfg_file=/usr/local/nagios/etc/objects/commands.cfg
+cfg_file=/usr/local/nagios/etc/objects/contacts.cfg
+cfg_file=/usr/local/nagios/etc/objects/timeperiods.cfg
+cfg_file=/usr/local/nagios/etc/objects/templates.cfg
+cfg_file=/usr/local/nagios/etc/objects/hosts.cfg
+cfg_file=/usr/local/nagios/etc/objects/services.cfg
+
+# OBJECT CACHE FILE
+object_cache_file=/usr/local/nagios/var/objects.cache
+
+# PRE-CACHED OBJECT FILE
+precached_object_file=/usr/local/nagios/var/objects.precache
+
+# RESOURCE FILE
+resource_file=/usr/local/nagios/etc/resource.cfg
+
+# STATUS FILE
+status_file=/usr/local/nagios/var/status.dat
+
+# STATUS FILE UPDATE INTERVAL
+status_update_interval=10
+
+# NAGIOS USER
+nagios_user=nagios
+
+# NAGIOS GROUP
+nagios_group=nagcmd
+
+# CHECK RESULT PATH
+check_result_path=/usr/local/nagios/var/spool/checkresults
+
+# MAX CHECK RESULT REAPER TIME
+max_check_result_reaper_time=30
+
+# CHECK RESULT FILE AGE
+check_result_file_age=3600
+
+# EXTERNAL COMMAND FILE
+command_file=/usr/local/nagios/var/rw/nagios.cmd
+
+# LOCK FILE
+lock_file=/usr/local/nagios/var/nagios.lock
+
+# TEMP FILE
+temp_file=/usr/local/nagios/var/nagios.tmp
+
+# TEMP PATH
+temp_path=/tmp
+
+# EVENT BROKER OPTIONS
+event_broker_options=-1
+
+# LOG ROTATION METHOD
+log_rotation_method=d
+
+# LOG ARCHIVE PATH
+log_archive_path=/usr/local/nagios/var/archives
+
+# LOGGING OPTIONS
+use_syslog=1
+log_notifications=1
+log_service_retries=1
+log_host_retries=1
+log_event_handlers=1
+log_initial_states=0
+log_external_commands=1
+log_passive_checks=1
+
+# GLOBAL HOST AND SERVICE EVENT HANDLERS
+# global_host_event_handler=somecommand
+# global_service_event_handler=somecommand
+
+# SERVICE CHECK TIMEOUT
+service_check_timeout=60
+
+# HOST CHECK TIMEOUT
+host_check_timeout=30
+
+# EVENT HANDLER TIMEOUT
+event_handler_timeout=30
+
+# NOTIFICATION TIMEOUT
+notification_timeout=30
+
+# OBSESS OVER SERVICE CHECKS OPTION
+obsess_over_services=0
+
+# OBSESS OVER HOST CHECKS OPTION
+obsess_over_hosts=0
+
+# SERVICE CHECK INTERLEAVE FACTOR
+service_interleave_factor=s
+
+# MAX CONCURRENT SERVICE CHECKS
+max_concurrent_checks=0
+
+# CHECK RESULT REAPER FREQUENCY
+check_result_reaper_frequency=10
+
+# CACHED HOST CHECK HORIZON
+cached_host_check_horizon=15
+
+# ENABLE PREDICTIVE HOST DEPENDENCY CHECKS
+enable_predictive_host_dependency_checks=1
+
+# ENABLE PREDICTIVE SERVICE DEPENDENCY CHECKS
+enable_predictive_service_dependency_checks=1
+
+# SOFT STATE DEPENDENCIES
+soft_state_dependencies=0
+
+# TIMEOUT STATE
+# 0 = OK, 1 = WARNING, 2 = CRITICAL, 3 = UNKNOWN
+auto_reschedule_checks=0
+auto_rescheduling_interval=30
+auto_rescheduling_window=180
+
+# SERVICE CHECK TIMEOUT STATE
+service_check_timeout_state=c
+
+# AGGRESSIVE HOST CHECKING OPTION
+use_aggressive_host_checking=0
+
+# SERVICE CHECK EXECUTION OPTION
+execute_service_checks=1
+
+# PASSIVE SERVICE CHECK ACCEPTANCE OPTION
+accept_passive_service_checks=1
+
+# HOST CHECK EXECUTION OPTION
+execute_host_checks=1
+
+# PASSIVE HOST CHECK ACCEPTANCE OPTION
+accept_passive_host_checks=1
+
+# NOTIFICATIONS OPTION
+enable_notifications=1
+
+# EVENT HANDLER OPTION
+enable_event_handlers=1
+
+# PROCESS PERFORMANCE DATA OPTION
+process_performance_data=0
+
+# OBSESS OVER SERVICE CHECKS OPTION
+obsess_over_services=0
+
+# OBSESS OVER HOST CHECKS OPTION
+obsess_over_hosts=0
+
+# CHECK FOR UPDATES
+check_for_updates=1
+
+# CHECK FOR ORPHANED SERVICES/HOSTS
+check_for_orphaned_services=1
+check_for_orphaned_hosts=1
+
+# SERVICE FRESHNESS CHECK OPTION
+check_service_freshness=1
+service_freshness_check_interval=60
+
+# HOST FRESHNESS CHECK OPTION
+check_host_freshness=0
+host_freshness_check_interval=60
+
+# DATE FORMAT OPTION
+date_format=us
+
+# ILLEGAL OBJECT NAME CHARACTERS
+illegal_object_name_chars=`~!$%^&*|'"<>?,()=
+
+# ILLEGAL MACRO OUTPUT CHARACTERS
+illegal_macro_output_chars=`~$&|'"<>
+
+# REGULAR EXPRESSION MATCHING
+use_regexp_matching=0
+use_true_regexp_matching=0
+
+# ADMINISTRATOR EMAIL/PAGER ADDRESSES
+admin_email=nagios@localhost
+admin_pager=pagenagios@localhost
+
+# DAEMON CORE DUMP OPTION
+daemon_dumps_core=0
+
+# LARGE INSTALLATION TWEAKS OPTION
+use_large_installation_tweaks=0
+
+# ENABLE ENVIRONMENT MACROS
+enable_environment_macros=1
+
+# CHILD PROCESS MEMORY LIMIT
+# child_processes_fork_twice=0
+
+# DEBUG LEVEL
+debug_level=0
+debug_verbosity=1
+debug_file=/usr/local/nagios/var/nagios.debug
+max_debug_file_size=1000000

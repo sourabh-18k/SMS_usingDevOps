@@ -1,0 +1,33 @@
+###############################################################################
+# HOSTS.CFG - Host Definitions for SMS Application
+###############################################################################
+
+# Define the Application Server
+define host {
+    use                     linux-server
+    host_name               sms-app-server
+    alias                   SMS Application Server
+    address                 {{ hostvars['app_vm']['ansible_host'] }}
+    check_command           check-host-alive
+    check_interval          5
+    retry_interval          1
+    max_check_attempts      5
+    check_period            24x7
+    notification_interval   30
+    notification_period     24x7
+}
+
+# Define Localhost (Nagios Server)
+define host {
+    use                     linux-server
+    host_name               localhost
+    alias                   Nagios Monitoring Server
+    address                 127.0.0.1
+    check_command           check-host-alive
+    check_interval          5
+    retry_interval          1
+    max_check_attempts      5
+    check_period            24x7
+    notification_interval   30
+    notification_period     24x7
+}

@@ -21,7 +21,7 @@ public class EngagementController {
     }
 
     @GetMapping("/attendance")
-    public java.util.List<Dtos.AttendanceResponse> listAttendance(@RequestParam Long courseId) {
+    public java.util.List<Dtos.AttendanceResponse> listAttendance(@RequestParam(required = false) Long courseId) {
         return engagementService.listAttendance(courseId);
     }
 

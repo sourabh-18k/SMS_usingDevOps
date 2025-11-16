@@ -2,6 +2,27 @@
 
 Apple-inspired full-stack SMS with Spring Boot 3 + React/Vite.
 
+## 🚀 NEW: Complete DevOps Implementation!
+
+This project now includes a **production-grade DevOps pipeline** with:
+- ✅ **Terraform** - Infrastructure as Code (Azure)
+- ✅ **Ansible** - Automated server configuration
+- ✅ **GitHub Actions** - Full CI/CD pipeline
+- ✅ **Docker** - Containerized deployment
+- ✅ **Nagios** - 24/7 monitoring & alerts
+
+### 📚 DevOps Documentation
+- **[🎯 Quick Start (30 min setup)](QUICKSTART.md)** - Fast deployment guide
+- **[📖 Complete DevOps Guide](README-DEVOPS.md)** - Detailed technical documentation
+- **[🎓 Presentation Guide](PRESENTATION-GUIDE.md)** - How to demo in class
+- **[🏗️ Architecture Diagram](ARCHITECTURE.md)** - System design & data flow
+- **[🔐 GitHub Secrets Setup](GITHUB-SECRETS-GUIDE.md)** - CI/CD configuration
+- **[📋 Project Summary](DEVOPS-SUMMARY.md)** - What was built & why
+
+**Time to deploy:** ~30 minutes | **Cost:** Free (Azure Student) | **Difficulty:** Intermediate
+
+---
+
 ## Features
 - JWT auth (Admin, Teacher, Student) with Spring Security 6, role-guarded routes.
 - CRUD for Students, Teachers, Courses, Departments, Enrollments, Attendance, Marks.
@@ -94,3 +115,47 @@ rollNo,firstName,lastName,email,phone,dob,gender,address,departmentCode,enrollDa
 
 ## License
 MIT (adjust as needed).
+
+---
+
+## 🎓 DevOps Classroom Project
+
+This application demonstrates modern DevOps practices suitable for academic presentations:
+
+### What's Included:
+- **Infrastructure as Code**: Terraform creates 2 Azure VMs, PostgreSQL, networking
+- **Configuration Management**: Ansible automates server setup (Docker, Java, Node.js)
+- **CI/CD Pipeline**: GitHub Actions builds, tests, scans, and deploys automatically
+- **Containerization**: Multi-stage Docker builds for backend and frontend
+- **Monitoring**: Nagios tracks application health, CPU, disk, and services
+- **Security**: Automated vulnerability scanning with Trivy
+
+### Quick Commands:
+```powershell
+# Generate SSH keys
+.\scripts\generate-ssh-key.ps1
+
+# Deploy infrastructure to Azure
+.\scripts\deploy-azure.ps1
+
+# Configure servers (in WSL)
+.\scripts\configure-servers.sh
+
+# Push code to auto-deploy
+git push origin main
+```
+
+### Access Points (after deployment):
+- **Backend API**: http://YOUR_VM_IP:8080
+- **Frontend**: http://YOUR_VM_IP:5173
+- **Swagger**: http://YOUR_VM_IP:8080/swagger-ui/index.html
+- **Nagios**: http://YOUR_MONITOR_IP/nagios
+
+### Skills Demonstrated:
+Azure • Terraform • Ansible • Docker • GitHub Actions • Nagios • Linux • Spring Boot • React • PostgreSQL • CI/CD • IaC • Configuration Management • Monitoring • Security Scanning
+
+**Perfect for:** Class projects, portfolio pieces, DevOps learning, cloud deployment practice
+
+**See [QUICKSTART.md](QUICKSTART.md) for 30-minute setup guide!**
+
+---

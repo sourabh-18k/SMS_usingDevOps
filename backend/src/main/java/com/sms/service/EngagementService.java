@@ -38,7 +38,10 @@ public class EngagementService {
     }
 
     public List<Dtos.AttendanceResponse> listAttendance(Long courseId) {
-        return attendanceRepository.findByCourseId(courseId).stream()
+        List<Attendance> source = courseId == null
+                ? attendanceRepository.findAll()
+                : attendanceRepository.findByIdCourseId(courseId);
+        return source.stream()
                 .map(a -> new Dtos.AttendanceResponse(a.getStudent().getId(), a.getCourse().getId(),
                         a.getId().getDate(), a.getStatus()))
                 .toList();

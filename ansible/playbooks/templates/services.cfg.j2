@@ -1,0 +1,87 @@
+###############################################################################
+# SERVICES.CFG - Service Definitions for SMS Application
+###############################################################################
+
+# Service: Ping Check for App Server
+define service {
+    use                     generic-service
+    host_name               sms-app-server
+    service_description     PING
+    check_command           check_ping!100.0,20%!500.0,60%
+    check_interval          5
+    retry_interval          1
+}
+
+# Service: SSH Check for App Server
+define service {
+    use                     generic-service
+    host_name               sms-app-server
+    service_description     SSH
+    check_command           check_ssh
+    check_interval          5
+    retry_interval          1
+}
+
+# Service: Backend API Check (Port 8080)
+define service {
+    use                     generic-service
+    host_name               sms-app-server
+    service_description     Backend API (Port 8080)
+    check_command           check_http!-p 8080 -u /
+    check_interval          5
+    retry_interval          1
+}
+
+# Service: Frontend Check (Port 5173)
+define service {
+    use                     generic-service
+    host_name               sms-app-server
+    service_description     Frontend (Port 5173)
+    check_command           check_tcp!5173
+    check_interval          5
+    retry_interval          1
+}
+
+# Service: CPU Load on App Server
+define service {
+    use                     generic-service
+    host_name               sms-app-server
+    service_description     CPU Load
+    check_command           check_local_load!5.0,4.0,3.0!10.0,6.0,4.0
+    check_interval          5
+    retry_interval          1
+}
+
+# Service: Disk Usage on App Server
+define service {
+    use                     generic-service
+    host_name               sms-app-server
+    service_description     Root Partition
+    check_command           check_local_disk!20%!10%!/
+    check_interval          5
+    retry_interval          1
+}
+
+# Service: Localhost Ping
+define service {
+    use                     generic-service
+    host_name               localhost
+    service_description     PING
+    check_command           check_ping!100.0,20%!500.0,60%
+}
+
+# Service: Localhost CPU Load
+define service {
+    use                     generic-service
+    host_name               localhost
+    service_description     CPU Load
+    check_command           check_local_load!5.0,4.0,3.0!10.0,6.0,4.0
+}
+
+# Service: Localhost Disk Usage
+define service {
+    use                     generic-service
+    host_name               localhost
+    service_description     Root Partition
+    check_command           check_local_disk!20%!10%!/
+}

@@ -1,0 +1,89 @@
+---
+# Playbook: Deploy SMS Application
+# This playbook deploys the SMS application using Docker Compose
+
+- name: Deploy SMS Application
+  hosts: app_servers
+  become: yes
+  gather_facts: yes
+
+  vars:
+    app_dir: /opt/sms
+    git_repo: "{{ lookup('env', 'GIT_REPO') | default('', true) }}"
+    git_branch: "{{ lookup('env', 'GIT_BRANCH') | default('main', true) }}"
+
+  tasks:
+    - name: Stop existing containers
+      shell: |
+        cd {{ app_dir }}
+        docker-compose down || true
+      ignore_errors: yes
+
+    - name: Clone or update repository
+      git:
+        repo: "{{ git_repo }}"
+        dest: "{{ app_dir }}"
+        version: "{{ git_branch }}"
+        force: yes
+      when: git_repo != ""
+      become_user: "{{ ansible_user }}"
+
+    - name: Copy docker-compose.yml if repo not provided
+      copy:
+        src: "{{ playbook_dir }}/../../docker-compose.yml"
+        dest: "{{ app_dir }}/docker-compose.yml"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+      when: git_repo == ""
+
+    - name: Create backend directory
+      file:
+        path: "{{ app_dir }}/backend"
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+
+    - name: Create frontend directory
+      file:
+        path: "{{ app_dir }}/frontend"
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+
+    - name: Update docker-compose.yml with environment
+      template:
+        src: templates/docker-compose.yml.j2
+        dest: "{{ app_dir }}/docker-compose.yml"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+
+    - name: Build and start containers
+      shell: |
+        cd {{ app_dir }}
+        docker-compose up -d --build
+      become_user: "{{ ansible_user }}"
+
+    - name: Wait for backend to be ready
+      wait_for:
+        host: localhost
+        port: 8080
+        delay: 10
+        timeout: 120
+
+    - name: Check container status
+      shell: docker-compose ps
+      args:
+        chdir: "{{ app_dir }}"
+      register: container_status
+
+    - name: Display container status
+      debug:
+        var: container_status.stdout_lines
+
+    - name: Display deployment info
+      debug:
+        msg:
+          - "Deployment completed!"
+          - "Backend: http://{{ ansible_host }}:8080"
+          - "Frontend: http://{{ ansible_host }}:5173"
+          - "Swagger UI: http://{{ ansible_host }}:8080/swagger-ui/index.html"

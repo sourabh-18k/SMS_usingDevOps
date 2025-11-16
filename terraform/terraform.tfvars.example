@@ -1,0 +1,11 @@
+# Example Terraform Variables
+# Copy this file to terraform.tfvars and update with your values
+
+resource_group_name  = "sms-devops-rg"
+location             = "East US"
+prefix               = "sms"
+environment          = "dev"
+admin_username       = "azureuser"
+ssh_public_key_path  = "~/.ssh/id_rsa.pub"
+db_admin_username    = "smsadmin"
+db_admin_password    = "ChangeMe123!Strong"

@@ -1,0 +1,172 @@
+---
+# Playbook: Setup Nagios Monitoring Server
+# This playbook installs and configures Nagios Core for monitoring
+
+- name: Setup Nagios Monitoring Server
+  hosts: monitoring_servers
+  become: yes
+  gather_facts: yes
+
+  vars:
+    nagios_version: "4.4.14"
+    nagios_plugins_version: "2.4.6"
+    nagios_admin_user: nagiosadmin
+    nagios_admin_password: "{{ lookup('env', 'NAGIOS_PASSWORD') | default('Admin123!', true) }}"
+
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Install required packages
+      apt:
+        name:
+          - autoconf
+          - gcc
+          - libc6
+          - make
+          - wget
+          - unzip
+          - apache2
+          - php
+          - libapache2-mod-php
+          - libgd-dev
+          - openssl
+          - libssl-dev
+          - apache2-utils
+          - libperl-dev
+          - libdbi-perl
+          - libdbd-mysql-perl
+        state: present
+
+    - name: Create nagios user
+      user:
+        name: nagios
+        system: yes
+        shell: /bin/bash
+
+    - name: Create nagcmd group
+      group:
+        name: nagcmd
+        system: yes
+
+    - name: Add nagios and www-data to nagcmd group
+      user:
+        name: "{{ item }}"
+        groups: nagcmd
+        append: yes
+      loop:
+        - nagios
+        - www-data
+
+    - name: Download Nagios Core
+      get_url:
+        url: "https://github.com/NagiosEnterprises/nagioscore/archive/nagios-{{ nagios_version }}.tar.gz"
+        dest: /tmp/nagios.tar.gz
+
+    - name: Extract Nagios Core
+      unarchive:
+        src: /tmp/nagios.tar.gz
+        dest: /tmp/
+        remote_src: yes
+
+    - name: Compile Nagios Core
+      shell: |
+        cd /tmp/nagioscore-nagios-{{ nagios_version }}
+        ./configure --with-command-group=nagcmd
+        make all
+        make install
+        make install-init
+        make install-config
+        make install-commandmode
+        make install-webconf
+      args:
+        creates: /usr/local/nagios/bin/nagios
+
+    - name: Create Nagios admin user for web interface
+      htpasswd:
+        path: /usr/local/nagios/etc/htpasswd.users
+        name: "{{ nagios_admin_user }}"
+        password: "{{ nagios_admin_password }}"
+        create: yes
+
+    - name: Download Nagios Plugins
+      get_url:
+        url: "https://github.com/nagios-plugins/nagios-plugins/archive/release-{{ nagios_plugins_version }}.tar.gz"
+        dest: /tmp/nagios-plugins.tar.gz
+
+    - name: Extract Nagios Plugins
+      unarchive:
+        src: /tmp/nagios-plugins.tar.gz
+        dest: /tmp/
+        remote_src: yes
+
+    - name: Compile Nagios Plugins
+      shell: |
+        cd /tmp/nagios-plugins-release-{{ nagios_plugins_version }}
+        ./tools/setup
+        ./configure
+        make
+        make install
+      args:
+        creates: /usr/local/nagios/libexec/check_ping
+
+    - name: Copy Nagios configuration templates
+      template:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+        owner: nagios
+        group: nagcmd
+        mode: '0664'
+      loop:
+        - { src: 'templates/nagios.cfg.j2', dest: '/usr/local/nagios/etc/nagios.cfg' }
+        - { src: 'templates/hosts.cfg.j2', dest: '/usr/local/nagios/etc/objects/hosts.cfg' }
+        - { src: 'templates/services.cfg.j2', dest: '/usr/local/nagios/etc/objects/services.cfg' }
+
+    - name: Enable Apache modules
+      apache2_module:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - rewrite
+        - cgi
+
+    - name: Enable Nagios site
+      file:
+        src: /etc/apache2/sites-available/nagios.conf
+        dest: /etc/apache2/sites-enabled/nagios.conf
+        state: link
+      notify: Restart Apache
+
+    - name: Start and enable Nagios service
+      systemd:
+        name: nagios
+        state: started
+        enabled: yes
+
+    - name: Configure firewall - Allow HTTP
+      ufw:
+        rule: allow
+        port: '80'
+        proto: tcp
+
+    - name: Enable firewall
+      ufw:
+        state: enabled
+        policy: deny
+        direction: incoming
+
+    - name: Display Nagios access info
+      debug:
+        msg:
+          - "Nagios setup completed!"
+          - "Access Nagios at: http://{{ ansible_host }}/nagios"
+          - "Username: {{ nagios_admin_user }}"
+          - "Password: {{ nagios_admin_password }}"
+
+  handlers:
+    - name: Restart Apache
+      systemd:
+        name: apache2
+        state: restarted
