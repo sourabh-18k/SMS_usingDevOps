@@ -260,7 +260,7 @@ jobs:
         
         cat ansible/inventory/hosts.yml
         cd ansible
-        ansible-playbook -i inventory/hosts.yml playbooks/deploy-app.yml -vv
+        GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} ansible-playbook -i inventory/hosts.yml playbooks/deploy-app.yml -vv
 
     - name: Verify deployment
       run: |

@@ -57,6 +57,15 @@
         owner: "{{ ansible_user }}"
         group: "{{ ansible_user }}"
 
+    - name: Login to GitHub Container Registry
+      shell: |
+        echo "$GITHUB_TOKEN" | docker login ghcr.io -u sourabh-18k --password-stdin
+      environment:
+        GITHUB_TOKEN: "{{ lookup('env', 'GITHUB_TOKEN') }}"
+      become_user: "{{ ansible_user }}"
+      when: lookup('env', 'GITHUB_TOKEN') != ""
+      ignore_errors: yes
+
     - name: Pull latest images and start containers
       shell: |
         cd {{ app_dir }}
