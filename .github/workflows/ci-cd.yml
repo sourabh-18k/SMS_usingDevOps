@@ -296,9 +296,12 @@ jobs:
 
     - name: Test Backend Health
       run: |
-        response=$(curl -s -o /dev/null -w "%{http_code}" "http://${{ secrets.AZURE_APP_VM_IP }}:8080/")
-        echo "Backend response: $response"
-        if [ "$response" = "200" ] || [ "$response" = "404" ]; then
+        APP_IP="${{ secrets.AZURE_APP_VM_IP }}"
+        URL="http://${APP_IP}:8080/"
+        echo "Testing URL: [$URL]"
+        response=$(curl -s -o /dev/null -w "%{http_code}" "$URL")
+        echo "Status Code: $response"
+        if [ "$response" -eq 200 ] || [ "$response" -eq 404 ]; then
           echo "✅ Backend is up (HTTP $response)"
         else
           echo "❌ Backend health check failed (HTTP $response)"
@@ -307,9 +310,12 @@ jobs:
 
     - name: Test Frontend Health
       run: |
-        response=$(curl -s -o /dev/null -w "%{http_code}" "http://${{ secrets.AZURE_APP_VM_IP }}:5173/")
-        echo "Frontend response: $response"
-        if [ "$response" = "200" ]; then
+        APP_IP="${{ secrets.AZURE_APP_VM_IP }}"
+        URL="http://${APP_IP}:5173/"
+        echo "Testing URL: [$URL]"
+        response=$(curl -s -o /dev/null -w "%{http_code}" "$URL")
+        echo "Status Code: $response"
+        if [ "$response" -eq 200 ]; then
           echo "✅ Frontend is up (HTTP $response)"
         else
           echo "❌ Frontend health check failed (HTTP $response)"
@@ -318,9 +324,12 @@ jobs:
 
     - name: Test Swagger UI
       run: |
-        response=$(curl -s -o /dev/null -w "%{http_code}" "http://${{ secrets.AZURE_APP_VM_IP }}:8080/swagger-ui/index.html")
-        echo "Swagger UI response: $response"
-        if [ "$response" = "200" ]; then
+        APP_IP="${{ secrets.AZURE_APP_VM_IP }}"
+        URL="http://${APP_IP}:8080/swagger-ui/index.html"
+        echo "Testing URL: [$URL]"
+        response=$(curl -s -o /dev/null -w "%{http_code}" "$URL")
+        echo "Status Code: $response"
+        if [ "$response" -eq 200 ]; then
           echo "✅ Swagger UI is accessible (HTTP $response)"
         else
           echo "⚠️ Swagger UI check failed (HTTP $response)"
