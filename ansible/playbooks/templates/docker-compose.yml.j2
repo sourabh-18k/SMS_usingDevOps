@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   backend:
-    image: ghcr.io/sourabh-18k/sms_usingdevops/backend:latest
+    image: ghcr.io/sourabh-18k/sms-backend:latest
     environment:
       SPRING_PROFILES_ACTIVE: prod
       SPRING_DATASOURCE_URL: jdbc:postgresql://{{ db_host }}:5432/{{ db_name }}
@@ -15,7 +15,7 @@ services:
     restart: unless-stopped
 
   frontend:
-    image: ghcr.io/sourabh-18k/sms_usingdevops/frontend:latest
+    image: ghcr.io/sourabh-18k/sms-frontend:latest
     environment:
       VITE_API_BASE_URL: http://{{ ansible_host }}:8080
     ports:
