@@ -16,7 +16,11 @@ export const AuthContext = createContext<AuthContextValue>({
 });
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
+  // Default mock user - no login required
+  const [user, setUser] = useState<User | null>({
+    token: "mock-token",
+    role: "ADMIN"
+  });
 
   useEffect(() => {
     const token = localStorage.getItem("sms_token");

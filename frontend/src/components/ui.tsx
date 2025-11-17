@@ -56,20 +56,11 @@ const Sidebar = () => {
 };
 
 const NavBar = () => {
-  const { user, logout } = useAuth();
   return (
     <header className="flex items-center justify-between px-4 lg:px-10 py-6 border-b border-gray-200 dark:border-gray-800 bg-white/60 dark:bg-gray-950/60 backdrop-blur-xl sticky top-0 z-20">
       <h1 className="text-2xl font-semibold tracking-tight">Student Management</h1>
       <div className="flex items-center gap-4">
         <DarkModeToggle />
-        {user && (
-          <button
-            onClick={logout}
-            className="px-4 py-2 rounded-full bg-black text-white text-sm dark:bg-white dark:text-black"
-          >
-            Logout ({user.role})
-          </button>
-        )}
       </div>
     </header>
   );
