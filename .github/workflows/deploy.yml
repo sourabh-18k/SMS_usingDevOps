@@ -1,0 +1,167 @@
+name: Deploy to Azure
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  AZURE_VM_IP: ${{ secrets.AZURE_VM_IP }}
+  REGISTRY: ghcr.io
+  IMAGE_NAME_BACKEND: ${{ github.repository }}/sms-backend
+  IMAGE_NAME_FRONTEND: ${{ github.repository }}/sms-frontend
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Log in to Container Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build Backend Docker Image
+      run: |
+        cd backend
+        docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BACKEND }}:latest .
+        docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BACKEND }}:latest
+
+    - name: Build Frontend Docker Image
+      run: |
+        cd frontend
+        docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND }}:latest .
+        docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND }}:latest
+
+    - name: Check Secrets
+      run: |
+        echo "Checking required secrets..."
+        if [ -z "${{ secrets.AZURE_VM_IP }}" ]; then
+          echo "❌ ERROR: AZURE_VM_IP secret is not set!"
+          echo "Go to: Settings → Secrets → Actions → New repository secret"
+          exit 1
+        fi
+        if [ -z "${{ secrets.AZURE_VM_USER }}" ]; then
+          echo "❌ ERROR: AZURE_VM_USER secret is not set!"
+          exit 1
+        fi
+        if [ -z "${{ secrets.AZURE_SSH_KEY }}" ]; then
+          echo "❌ ERROR: AZURE_SSH_KEY secret is not set!"
+          exit 1
+        fi
+        echo "✅ All required secrets are configured"
+
+    - name: Deploy to Azure VM
+      if: success()
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.AZURE_VM_IP }}
+        username: ${{ secrets.AZURE_VM_USER }}
+        key: ${{ secrets.AZURE_SSH_KEY }}
+        port: 22
+        timeout: 60s
+        command_timeout: 30m
+        script: |
+          set -e
+          echo "=== Starting Deployment ==="
+          
+          # Login to GitHub Container Registry
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          
+          # Pull latest images
+          echo "Pulling backend image..."
+          docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BACKEND }}:latest
+          
+          echo "Pulling frontend image..."
+          docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND }}:latest
+          
+          # Stop and remove old containers
+          echo "Stopping old containers..."
+          docker stop sms-backend-1 sms-frontend-1 || true
+          docker rm sms-backend-1 sms-frontend-1 || true
+          
+          # Create network if not exists
+          docker network create sms-network 2>/dev/null || true
+          
+          # Run Backend
+          echo "Starting backend container..."
+          docker run -d \
+            --name sms-backend-1 \
+            --network sms-network \
+            -p 8080:8080 \
+            -e SPRING_PROFILES_ACTIVE=prod \
+            -e SPRING_DATASOURCE_URL=jdbc:postgresql://${{ secrets.DB_HOST }}:5432/sms_db \
+            -e SPRING_DATASOURCE_USERNAME=${{ secrets.DB_USER }} \
+            -e SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD }} \
+            --restart unless-stopped \
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BACKEND }}:latest
+          
+          # Wait for backend to start
+          echo "Waiting for backend to start..."
+          sleep 10
+          
+          # Run Frontend
+          echo "Starting frontend container..."
+          docker run -d \
+            --name sms-frontend-1 \
+            --network sms-network \
+            -p 5173:80 \
+            --restart unless-stopped \
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND }}:latest
+          
+          # Show running containers
+          echo "=== Running Containers ==="
+          docker ps --filter name=sms-
+          
+          echo "=== Deployment Complete ==="
+
+    - name: Wait for Services
+      if: success()
+      run: |
+        echo "Waiting 30 seconds for services to stabilize..."
+        sleep 30
+
+    - name: Smoke Tests
+      if: success()
+      run: |
+        echo "Running smoke tests..."
+        
+        # Test Backend
+        echo "Testing backend at http://${{ secrets.AZURE_VM_IP }}:8080"
+        BACKEND_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://${{ secrets.AZURE_VM_IP }}:8080 || echo "000")
+        if [ "$BACKEND_STATUS" = "000" ]; then
+          echo "❌ Backend is not responding!"
+          exit 1
+        fi
+        echo "✅ Backend responded with HTTP $BACKEND_STATUS"
+        
+        # Test Frontend
+        echo "Testing frontend at http://${{ secrets.AZURE_VM_IP }}:5173"
+        FRONTEND_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://${{ secrets.AZURE_VM_IP }}:5173 || echo "000")
+        if [ "$FRONTEND_STATUS" != "200" ]; then
+          echo "❌ Frontend is not responding correctly! (HTTP $FRONTEND_STATUS)"
+          exit 1
+        fi
+        echo "✅ Frontend responded with HTTP $FRONTEND_STATUS"
+        
+        echo ""
+        echo "🎉 All smoke tests passed!"
+
+    - name: Deployment Summary
+      if: always()
+      run: |
+        echo "==================================="
+        echo "📊 DEPLOYMENT SUMMARY"
+        echo "==================================="
+        echo "Status: ${{ job.status }}"
+        echo "Frontend URL: http://${{ secrets.AZURE_VM_IP }}:5173"
+        echo "Backend URL: http://${{ secrets.AZURE_VM_IP }}:8080"
+        echo "==================================="
