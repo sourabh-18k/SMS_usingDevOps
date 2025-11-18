@@ -24,17 +24,21 @@
     - name: Install docker-compose if not present
       shell: |
         if ! command -v docker-compose &> /dev/null; then
-          echo "Installing docker-compose plugin..."
-          sudo apt-get update -qq
-          sudo apt-get install -y docker-compose-plugin
+          echo "Installing docker-compose..."
+          sudo curl -L "https://github.com/docker/compose/releases/download/v2.24.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
         fi
-        docker compose version || docker-compose version
-      ignore_errors: yes
+        docker-compose --version
+      register: compose_install
+      
+    - name: Display docker-compose version
+      debug:
+        var: compose_install.stdout_lines
 
     - name: Stop existing containers
       shell: |
         cd {{ app_dir }}
-        docker compose down || docker-compose down || true
+        docker-compose down || true
       ignore_errors: yes
 
     - name: Clone or update repository
@@ -87,12 +91,12 @@
     - name: Pull latest images and start containers
       shell: |
         cd {{ app_dir }}
-        docker compose pull || docker-compose pull
-        docker compose up -d || docker-compose up -d
+        docker-compose pull
+        docker-compose up -d
       become_user: "{{ ansible_user }}"
 
     - name: Check container status
-      shell: docker compose ps || docker-compose ps
+      shell: docker-compose ps
       args:
         chdir: "{{ app_dir }}"
       register: container_status
@@ -102,7 +106,7 @@
         var: container_status.stdout_lines
 
     - name: Check backend logs if container exists
-      shell: docker compose logs backend | tail -50 || docker-compose logs backend | tail -50
+      shell: docker-compose logs backend | tail -50
       args:
         chdir: "{{ app_dir }}"
       register: backend_logs
@@ -122,7 +126,7 @@
       ignore_errors: yes
 
     - name: Final container status check
-      shell: docker compose ps || docker-compose ps
+      shell: docker-compose ps
       args:
         chdir: "{{ app_dir }}"
       register: final_status
