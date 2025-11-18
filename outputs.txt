@@ -1,0 +1,10 @@
+﻿app_vm_public_ip = "4.218.12.135"
+app_vm_ssh_command = "ssh azureuser@4.218.12.135"
+backend_url = "http://4.218.12.135:8080"
+frontend_url = "http://4.218.12.135:5173"
+monitor_vm_public_ip = "4.217.199.101"
+monitor_vm_ssh_command = "ssh azureuser@4.217.199.101"
+nagios_url = "http://4.217.199.101/nagios"
+postgresql_connection_string = <sensitive>
+postgresql_server_fqdn = "sms-psql-server.postgres.database.azure.com"
+resource_group_name = "sms-devops-rg"

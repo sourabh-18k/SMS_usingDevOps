@@ -1,0 +1,191 @@
+---
+- name: Install Nagios on App Server
+  hosts: app_server
+  become: yes
+  vars:
+    nagios_admin_password: "nagiosadmin"
+    app_vm_ip: "4.218.12.135"
+    
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Install prerequisites
+      apt:
+        name:
+          - apache2
+          - php
+          - php-gd
+          - libgd-dev
+          - libapache2-mod-php
+          - build-essential
+          - libssl-dev
+          - bc
+          - gawk
+          - dc
+          - snmp
+          - libnet-snmp-perl
+          - gettext
+          - autoconf
+          - wget
+          - unzip
+        state: present
+
+    - name: Create nagios user and group
+      user:
+        name: nagios
+        system: yes
+        shell: /bin/bash
+        home: /usr/local/nagios
+
+    - name: Create nagcmd group
+      group:
+        name: nagcmd
+        system: yes
+
+    - name: Add nagios to nagcmd group
+      user:
+        name: nagios
+        groups: nagcmd
+        append: yes
+
+    - name: Add www-data to nagcmd group
+      user:
+        name: www-data
+        groups: nagcmd
+        append: yes
+
+    - name: Download Nagios Core
+      get_url:
+        url: https://github.com/NagiosEnterprises/nagioscore/releases/download/nagios-4.4.14/nagios-4.4.14.tar.gz
+        dest: /tmp/nagios-4.4.14.tar.gz
+        mode: '0644'
+
+    - name: Extract Nagios Core
+      unarchive:
+        src: /tmp/nagios-4.4.14.tar.gz
+        dest: /tmp/
+        remote_src: yes
+
+    - name: Configure Nagios
+      shell: |
+        cd /tmp/nagios-4.4.14
+        ./configure --with-nagios-group=nagios --with-command-group=nagcmd --with-httpd-conf=/etc/apache2/sites-available
+      args:
+        creates: /tmp/nagios-4.4.14/Makefile
+
+    - name: Compile Nagios
+      make:
+        chdir: /tmp/nagios-4.4.14
+        target: all
+
+    - name: Install Nagios
+      make:
+        chdir: /tmp/nagios-4.4.14
+        target: install
+
+    - name: Install Nagios init scripts
+      make:
+        chdir: /tmp/nagios-4.4.14
+        target: install-init
+
+    - name: Install Nagios command mode
+      make:
+        chdir: /tmp/nagios-4.4.14
+        target: install-commandmode
+
+    - name: Install Nagios config files
+      make:
+        chdir: /tmp/nagios-4.4.14
+        target: install-config
+
+    - name: Install Apache config for Nagios
+      make:
+        chdir: /tmp/nagios-4.4.14
+        target: install-webconf
+
+    - name: Enable Apache modules
+      apache2_module:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - rewrite
+        - cgi
+
+    - name: Create nagiosadmin user for web interface
+      htpasswd:
+        path: /usr/local/nagios/etc/htpasswd.users
+        name: nagiosadmin
+        password: "{{ nagios_admin_password }}"
+        mode: 0640
+        owner: nagios
+        group: www-data
+
+    - name: Download Nagios Plugins
+      get_url:
+        url: https://github.com/nagios-plugins/nagios-plugins/releases/download/release-2.4.6/nagios-plugins-2.4.6.tar.gz
+        dest: /tmp/nagios-plugins-2.4.6.tar.gz
+        mode: '0644'
+
+    - name: Extract Nagios Plugins
+      unarchive:
+        src: /tmp/nagios-plugins-2.4.6.tar.gz
+        dest: /tmp/
+        remote_src: yes
+
+    - name: Configure Nagios Plugins
+      shell: |
+        cd /tmp/nagios-plugins-2.4.6
+        ./configure --with-nagios-user=nagios --with-nagios-group=nagios --with-openssl
+      args:
+        creates: /tmp/nagios-plugins-2.4.6/Makefile
+
+    - name: Compile Nagios Plugins
+      make:
+        chdir: /tmp/nagios-plugins-2.4.6
+
+    - name: Install Nagios Plugins
+      make:
+        chdir: /tmp/nagios-plugins-2.4.6
+        target: install
+
+    - name: Configure monitoring for localhost
+      template:
+        src: templates/nagios-localhost.cfg.j2
+        dest: /usr/local/nagios/etc/objects/localhost.cfg
+        owner: nagios
+        group: nagios
+        mode: '0644'
+
+    - name: Verify Nagios configuration
+      command: /usr/local/nagios/bin/nagios -v /usr/local/nagios/etc/nagios.cfg
+      register: nagios_verify
+      changed_when: false
+
+    - name: Display Nagios verification result
+      debug:
+        var: nagios_verify.stdout_lines
+
+    - name: Enable and start Nagios service
+      systemd:
+        name: nagios
+        enabled: yes
+        state: started
+
+    - name: Restart Apache
+      systemd:
+        name: apache2
+        state: restarted
+
+    - name: Display Nagios access information
+      debug:
+        msg:
+          - "================================================"
+          - "Nagios installation completed successfully!"
+          - "================================================"
+          - "Access Nagios at: http://{{ app_vm_ip }}/nagios"
+          - "Username: nagiosadmin"
+          - "Password: {{ nagios_admin_password }}"
+          - "================================================"

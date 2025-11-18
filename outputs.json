@@ -1,0 +1,52 @@
+﻿{
+  "app_vm_public_ip": {
+    "sensitive": false,
+    "type": "string",
+    "value": "4.218.12.135"
+  },
+  "app_vm_ssh_command": {
+    "sensitive": false,
+    "type": "string",
+    "value": "ssh azureuser@4.218.12.135"
+  },
+  "backend_url": {
+    "sensitive": false,
+    "type": "string",
+    "value": "http://4.218.12.135:8080"
+  },
+  "frontend_url": {
+    "sensitive": false,
+    "type": "string",
+    "value": "http://4.218.12.135:5173"
+  },
+  "monitor_vm_public_ip": {
+    "sensitive": false,
+    "type": "string",
+    "value": "4.217.199.101"
+  },
+  "monitor_vm_ssh_command": {
+    "sensitive": false,
+    "type": "string",
+    "value": "ssh azureuser@4.217.199.101"
+  },
+  "nagios_url": {
+    "sensitive": false,
+    "type": "string",
+    "value": "http://4.217.199.101/nagios"
+  },
+  "postgresql_connection_string": {
+    "sensitive": true,
+    "type": "string",
+    "value": "jdbc:postgresql://sms-psql-server.postgres.database.azure.com:5432/sms"
+  },
+  "postgresql_server_fqdn": {
+    "sensitive": false,
+    "type": "string",
+    "value": "sms-psql-server.postgres.database.azure.com"
+  },
+  "resource_group_name": {
+    "sensitive": false,
+    "type": "string",
+    "value": "sms-devops-rg"
+  }
+}

@@ -294,9 +294,14 @@ resource "azurerm_postgresql_flexible_server" "sms_db" {
   storage_mb             = 32768 # 32GB minimum
   sku_name               = "B_Standard_B1ms"
   backup_retention_days  = 7
+  zone                   = "1"
 
   tags = {
     Environment = var.environment
+  }
+
+  lifecycle {
+    ignore_changes = [zone]
   }
 }
 

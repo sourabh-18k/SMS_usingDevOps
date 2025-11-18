@@ -1,4 +1,4 @@
-// Runtime configuration injected by entrypoint
+// Runtime configuration for local development
 window.APP_CONFIG = {
-  API_BASE_URL: '__API_BASE_URL__'
+  API_BASE_URL: 'http://localhost:8080'
 };
